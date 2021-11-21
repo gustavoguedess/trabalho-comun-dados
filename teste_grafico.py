@@ -9,10 +9,9 @@ root.geometry("800x600")
 test_msg = [0, 1, -1, 0, 0, 1, -1, 0, 0, 1, -1, 1, 0, -1, 0, 1, 0, -1, 1, -1, 0, 1, 0, 0, 0, -1, 1, 0, 0, -1, 1, 0, 0, -1, 1, -1, 0, 1, 0, -1]
 
 def graph(data):
-    data.insert(len(data),0)
+    data.insert(len(data),0) # adds zero to fully draw the last bit on the graphic (not necessary, it just looks better)
     y = data
     x = np.arange(len(data))
-    print(len(data)/2)
 
     fig = plt.figure(figsize=(10,2),dpi=150)
 
@@ -35,6 +34,7 @@ def graph(data):
     ax.grid(which='major', axis='y', linestyle='-', alpha=0.7)
     
     plt.show()
+    data.pop() # removes the zero added at the start
 
 
 button = Button(root, text="Mostrar Gráfico", command= lambda: graph(test_msg))
