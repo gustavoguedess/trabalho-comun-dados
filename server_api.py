@@ -10,7 +10,7 @@ messages_list = []
 class MessageItem(BaseModel):
     dest_name: str
     origin_name: str
-    message: float
+    message: str
     date: str
 
 @app.get("/")
