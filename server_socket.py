@@ -3,7 +3,7 @@ from threading import Thread
 
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 8860
-separator_token = "<SEP>" 
+sep = ":::" 
 
 
 client_sockets = set()
@@ -21,10 +21,12 @@ def listen_for_client(cs):
             print(f"[!] Error: {e}")
             client_sockets.remove(cs)
         else:
-            msg = msg.replace(separator_token, ": ")
+            room, msg = msg.split(sep)
+        print(room)
         print(msg)
         for client_socket in client_sockets:
-            client_socket.send(msg.encode())
+            if client_socket==room:
+                client_socket.send(msg.encode())
 
 while True:
     client_socket, client_address = s.accept()
