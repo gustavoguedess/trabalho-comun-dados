@@ -1,18 +1,26 @@
-from typing import Optional
 from fastapi import FastAPI
 import uvicorn 
+
+from pydantic import BaseModel
 
 app = FastAPI()
 
 messages_list = []
 
+class MessageItem(BaseModel):
+    dest_name: str
+    origin_name: str
+    message: float
+    date: str
+
 @app.get("/")
 def read_root():
     return {"Server": "On"}
 
-@app.get("/send_message/")
-def send_message():
-    return {"Hello": "World"}
+@app.get("/send/")
+def send(message: MessageItem):
+    messages_list.append(message)
+    return {"Status":"Ok"}
 
 @app.get("/listen/{name}")
 def listen(name: str):
@@ -26,10 +34,6 @@ def listen(name: str):
 
     messages_list.remove(message)
     return message
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
-
+    
 if __name__ == "__main__":
     uvicorn.run("server_api:app", host="0.0.0.0", port=8860, log_level="info")
