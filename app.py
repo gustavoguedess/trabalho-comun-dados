@@ -88,7 +88,7 @@ def click_enviar():
     res_send = send(username_ori, username_dest, res_encode['encoded'])
     print(res_send)
 
-    encoded = res_encode['encoded'].strip('][').split(', ')
+    encoded = list(map(int, res_encode['encoded'].strip('][').split(', ')))
     graph(encoded)
     
     text_encoded.insert(INSERT, res_encode['encoded'])
@@ -129,7 +129,7 @@ def click_receber():
 
     txt_msg.insert(0, res_msg['message'])
 
-    encoded = res_msg['encoded'].strip('][').split(', ')
+    encoded = list(map(int, res_msg['encoded'].strip('][').split(', ')))
     graph(encoded)
 
     text_encoded.insert(INSERT, res_msg['encoded'])
