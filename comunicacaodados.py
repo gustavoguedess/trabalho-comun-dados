@@ -47,13 +47,13 @@ def bitsParaAMI(bits):
 
 def AMIParaBits(bits):
     result = []
-    for b in range(len(bits1)):
-        if bits1[b] == 0:
+    for b in range(len(bits)):
+        if bits[b] == 0:
             result.append(0)
         else:
            result.append(1)
     return result
-
+'''
 string1 = input('Digite a mensagem: ')#"ola"
 
 string2 = criptografia(string1)
@@ -73,3 +73,5 @@ print('Voltado para string: ',string3)
 
 string4 = descriptografia(string3)
 print('Descriptografando: ',string4)
+
+#'''
