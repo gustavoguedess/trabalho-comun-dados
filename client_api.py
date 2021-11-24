@@ -9,9 +9,24 @@ from datetime import datetime
 
 from comunicacaodados import *
 
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
 SERVER = 'http://18.191.148.32:8860'
+
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class MessageItem(BaseModel):
     dest_name: str
@@ -59,6 +74,8 @@ def decrypt(query: OnlyMessage):
     encrypted = bitsParaString(binary)
     message = descriptografia(encrypted)
     
+    graph(encoded)
+    
     return DecryptItem(encrypted=encrypted, encoded=str(encoded), binary=str(binary), message=message)
 
 @app.get("/encode/")
@@ -69,6 +86,36 @@ def decrypt(query: OnlyMessage):
     encoded = bitsParaAMI(binary)
 
     return DecryptItem(message=message, encrypted=encrypted, binary=str(binary), encoded=str(encoded))
+
+
+def graph(data):
+    data.insert(len(data),0) # adds zero to fully draw the last bit on the graphic (not necessary, it just looks better)
+    y = data
+    x = np.arange(len(data))
+
+    fig = plt.figure(figsize=(10,2),dpi=150)
+
+    ax = fig.add_subplot()
+
+    ax.plot(x, y, drawstyle="steps-post", linewidth=2.0)
+
+    ax.set_yticks([-1,0,1])
+    ax.set_yticklabels(['-V',0,'+V'])
+    ax.set_title('Forma da onda - AMI')
+
+    x_major_ticks = np.arange(-1, len(data)+1, 5)
+    x_minor_ticks = np.arange(-1, len(data)+1, 1)
+
+    ax.set_xticks(x_major_ticks)
+    ax.set_xticks(x_minor_ticks, minor=True)
+
+    ax.grid(which='major', axis='x', linestyle='--')
+    ax.grid(which='minor', axis='x', linestyle='--')
+    ax.grid(which='major', axis='y', linestyle='-', alpha=0.7)
+
+    plt.savefig("grafico.png")
+    data.pop() # removes the zero added at the start
+
 
 if __name__ == "__main__":
     uvicorn.run("client_api:app", host="0.0.0.0", port=8000, log_level="info")
