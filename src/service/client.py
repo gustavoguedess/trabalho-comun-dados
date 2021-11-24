@@ -1,44 +1,84 @@
 import requests
-from threading import Thread
 from datetime import datetime
-import json
+
+from comunicacaodados import *
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 SERVER = 'http://18.191.148.32:8860'
-name = input('Digite seu usuario: ')
 
+def send(origin_username:str, dest_username:str, message: str):
 
-def listen():
-    while True:
-        msg = requests.get(f"{SERVER}/listen/{name}").text
-        if msg != 'null':
-            msg = json.loads(msg)
-            print(f"{msg['origin_name']}: {msg['message']}")
+    date = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')) 
+    
+    message = {
+        "dest_name":dest_username, 
+        "origin_name":origin_username, 
+        "message":message, 
+        "date":date
+    }
 
+    
+    return requests.post(f'{SERVER}/send/', json=message).json()
 
-[]
+def listen(name: str):
+    msg = requests.get(f'{SERVER}/listen/{name}').json()
+    return msg
 
+def decode(message):
+    encoded = list(map(int, message.strip('][').split(', ')))
+    binary = AMIParaBits(encoded)
+    encrypted = bitsParaString(binary)
+    message = descriptografia(encrypted)
+    
+    res = {
+        'encrypted':encrypted, 
+        'encoded':str(encoded), 
+        'binary':str(binary), 
+        'message':message
+    }
 
-def encrypt(str):
-    return str
+    return res
 
+def encode(message):
+    encrypted = criptografia(message)
+    binary = stringParaBits(encrypted)
+    encoded = bitsParaAMI(binary)
 
-def send_message(msg, dest_name):
-    message = {}
+    res = {
+        'message': message, 
+        'encrypted': encrypted, 
+        'binary': str(binary), 
+        'encoded': str(encoded)
+    }
+    return res
 
-    msg = encrypt(msg)
-    message['dest_name'] = dest_name
-    message['origin_name'] = name
-    message['message'] = msg
-    message['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+def graph(data):
+    data.insert(len(data),0) # adds zero to fully draw the last bit on the graphic (not necessary, it just looks better)
+    y = data
+    x = np.arange(len(data))
 
-    requests.post(f"{SERVER}/send", json=message)
+    fig = plt.figure(figsize=(10,2),dpi=150)
 
+    ax = fig.add_subplot()
 
-t = Thread(target=listen)
-t.daemon = True
-t.start()
+    ax.plot(x, y, drawstyle="steps-post", linewidth=2.0)
 
-dest_name = input("Destino: ")
-while True:
-    msg = input()
-    send_message(msg, dest_name)
+    ax.set_yticks([-1,0,1])
+    ax.set_yticklabels(['-V',0,'+V'])
+    ax.set_title('Forma da onda - AMI')
+
+    x_major_ticks = np.arange(-1, len(data)+1, 5)
+    x_minor_ticks = np.arange(-1, len(data)+1, 1)
+
+    ax.set_xticks(x_major_ticks)
+    ax.set_xticks(x_minor_ticks, minor=True)
+
+    ax.grid(which='major', axis='x', linestyle='--')
+    ax.grid(which='minor', axis='x', linestyle='--')
+    ax.grid(which='major', axis='y', linestyle='-', alpha=0.7)
+
+    plt.savefig("grafico.png")
+    data.pop() # removes the zero added at the start
